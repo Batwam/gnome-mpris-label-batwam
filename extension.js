@@ -470,9 +470,56 @@ class MprisLabel extends PanelMenu.Button {
 
 		this._setText();
 		this._setIcon();
+		this._setProgressBar();
 
 		this._timeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT,
 			REFRESH_RATE, this._refresh.bind(this));
+	}
+
+	_setProgressBar(){
+		//https://github.com/home-sweet-gnome/dash-to-panel/blob/bbb85f6565f5fb9969a15a0607059274150dfc3b/appIcons.js#L601
+		//include setting to enable/disable progress bar
+		if(!this.player)
+			return
+
+		if(!this.label)
+			return
+			
+		if (this.player.playbackStatus == "Paused"){ //do not update as long as player is not playing
+			return
+		}
+
+		const position_per = this.player.getPosition()
+		if (!position_per || position_per == 0) //check if position works - only show is Position >0
+			return
+
+		if(this.progressBar){
+			this.box.remove_child(this.progressBar);
+			this.progressBar = null;
+		}
+
+		const containerWidth = this.label.get_width()
+		const containerHeight = Main.panel.get_height(); //this.box.get_height() reduced when switching from album to icon...
+
+		let icon_width=0
+		if(this.icon && this.settings.get_string('show-icon') == "left")
+			icon_width=this.icon.get_width()
+
+		const backgroundSize = Math.floor(containerWidth * position_per)
+
+		let bgSvg = '/img/highlight_stacked_bg'; //need to implement vertical later
+		let inlineStyle = 'margin: 0;';
+		const url = import.meta.url; //path to extensions.js
+		const extension_path = url.substring(0,url.lastIndexOf('/')); //extension path
+		inlineStyle += "background-image: url('" + extension_path + bgSvg + ".svg');" + 
+		//try to hard code to get two pictures
+		//https://stackoverflow.com/questions/10768451/inline-svg-in-css
+		// inlineStyle += "background-image: url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='10'><rect x='0' width='50' height='10' fill='#b39169'/></svg>\");";
+		"background-position: "+icon_width+"px 0px;" +
+		"background-size: " + backgroundSize+"px "+containerHeight+"px;"; //% values don't work
+		// this.label.set_style(inlineStyle);
+		//apply to box to be able to have the line further down
+		this.box.set_style(inlineStyle);
 	}
 
 	_setIcon(){

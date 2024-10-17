@@ -18,6 +18,13 @@ const mprisInterface = `
 
 </node>`
 
+const mprisPositionInterface = `
+<node>
+	<interface name="org.mpris.MediaPlayer2.Player">
+		<property name="Position" type="x" access="read" />
+	</interface>
+</node>`
+
 const entryInterface = `
 <node>
 	<interface name="org.mpris.MediaPlayer2">
@@ -219,15 +226,31 @@ class Player {
 			this.statusTimestamp = new Date().getTime();
 		}
 	}
+	getPosition(){
+		//set up dedicate proxy to extract Position
+		const positionProxyWrapper = Gio.DBusProxy.makeProxyWrapper(mprisPositionInterface);
+		const positionProxy = positionProxyWrapper(Gio.DBus.session, this.address, "/org/mpris/MediaPlayer2");
+		const position = positionProxy.Position;
+
+		const length = this.stringFromMetadata("mpris:length",this.metadata); //get song length to calculate % progress
+		
+		let position_per = 0
+		if (length >0)
+			position_per = position / length; //position percentage (format 0.81xxx)
+
+		return position_per
+	}
 	stringFromMetadata(field) {
 		// metadata is a javascript object
 		// each "field" correspond to a string-keyed property on metadata
 		// each property contains a GLib.Variant object
 		if (Object.keys(this.metadata).includes(field)){
 			let variant = this.metadata[field];
-
 			if(variant.get_type().is_array())
 				return variant.get_strv()[0]
+			else if (variant.get_type_string() === 'x'){ //length is a an int64
+				return variant.get_int64()
+			}
 			else
 				return variant.get_string()[0]
 		}
