@@ -479,24 +479,21 @@ class MprisLabel extends PanelMenu.Button {
 	_setProgressBar(){
 		//https://github.com/home-sweet-gnome/dash-to-panel/blob/bbb85f6565f5fb9969a15a0607059274150dfc3b/appIcons.js#L601
 		//include setting to enable/disable progress bar
+
+		this.box.set_style("background-image: none");
+
 		if(!this.player)
 			return
 
 		if(!this.label)
 			return
 			
-		if (this.player.playbackStatus == "Paused"){ //do not update as long as player is not playing
+		if (this.player.playbackStatus == "Paused") //do not update as long as player is not playing
 			return
-		}
 
 		const position_per = this.player.getPosition()
 		if (!position_per || position_per == 0) //check if position works - only show is Position >0
 			return
-
-		if(this.progressBar){
-			this.box.remove_child(this.progressBar);
-			this.progressBar = null;
-		}
 
 		const containerWidth = this.label.get_width()
 		const containerHeight = Main.panel.get_height(); //this.box.get_height() reduced when switching from album to icon...
