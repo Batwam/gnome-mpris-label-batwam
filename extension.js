@@ -477,8 +477,9 @@ class MprisLabel extends PanelMenu.Button {
 	}
 
 	_setProgressBar(){
-		//https://github.com/home-sweet-gnome/dash-to-panel/blob/bbb85f6565f5fb9969a15a0607059274150dfc3b/appIcons.js#L601
-		//include setting to enable/disable progress bar
+		//TODO: 
+		// include setting to enable/disable progress bar
+		// make this.player.getPosition() async
 
 		this.box.set_style("background-image: none");
 
@@ -492,23 +493,25 @@ class MprisLabel extends PanelMenu.Button {
 			return
 
 		const position_per = this.player.getPosition()
-		if (!position_per || position_per == 0) //check if position works - only show is Position >0
+		if (!position_per || position_per == 0) //some apps don't report positions
 			return
 
 		const containerWidth = this.label.get_width()
-		const containerHeight = Main.panel.get_height(); //this.box.get_height() reduced when switching from album to icon...
+		const containerHeight = Main.panel.get_height();
 
-		let icon_width=0
+		let left_padding=0
 		if(this.icon && this.settings.get_string('show-icon') == "left")
-			icon_width=this.icon.get_width()
+			left_padding=this.icon.get_width()
 
-		const backgroundSize = Math.floor(containerWidth * position_per)
+		const progressbarWidth = Math.floor(containerWidth * position_per)
+		const progressbarHeight = Math.floor(containerHeight * 0.1)
+		const top_padding = containerHeight - progressbarHeight
 
-		const url = import.meta.url; //path to extensions.js
+		const url = import.meta.url; //full path to extensions.js
 		const extension_path = url.substring(0,url.lastIndexOf('/'));
-		let inlineStyle = "background-image: url('" + extension_path + "/img/highlight_stacked_bg.svg');" + 
-		"background-position: "+icon_width+"px 0px;" +
-		"background-size: " + backgroundSize+"px "+containerHeight+"px;"; //% values don't work
+		let inlineStyle = "background-image: url('" + extension_path + "/img/grey_rectangle.svg');" + 
+			"background-position: " + left_padding + "px " + top_padding + "px;" +
+			"background-size: " + progressbarWidth + "px " + progressbarHeight + "px;";
 		this.box.set_style(inlineStyle);
 	}
 
