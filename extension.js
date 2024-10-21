@@ -504,18 +504,11 @@ class MprisLabel extends PanelMenu.Button {
 
 		const backgroundSize = Math.floor(containerWidth * position_per)
 
-		let bgSvg = '/img/highlight_stacked_bg'; //need to implement vertical later
-		let inlineStyle = 'margin: 0;';
 		const url = import.meta.url; //path to extensions.js
-		const extension_path = url.substring(0,url.lastIndexOf('/')); //extension path
-		inlineStyle += "background-image: url('" + extension_path + bgSvg + ".svg');" + 
-		//try to hard code to get two pictures
-		//https://stackoverflow.com/questions/10768451/inline-svg-in-css
-		// inlineStyle += "background-image: url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='10'><rect x='0' width='50' height='10' fill='#b39169'/></svg>\");";
+		const extension_path = url.substring(0,url.lastIndexOf('/'));
+		let inlineStyle = "background-image: url('" + extension_path + "/img/highlight_stacked_bg.svg');" + 
 		"background-position: "+icon_width+"px 0px;" +
 		"background-size: " + backgroundSize+"px "+containerHeight+"px;"; //% values don't work
-		// this.label.set_style(inlineStyle);
-		//apply to box to be able to have the line further down
 		this.box.set_style(inlineStyle);
 	}
 
