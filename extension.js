@@ -484,21 +484,21 @@ class MprisLabel extends PanelMenu.Button {
 		if( !SHOW_PROGRESS_BAR || !this.player || !this.label )
 			return
 
-		const position_per = this.player.getPosition()
-		if (!position_per || position_per == 0) //some apps don't report positions
+		const position_ratio = this.player.getPosition()
+		if (!position_ratio || position_ratio == 0) //some apps don't report positions
 			return
 
 		let left_padding=0
 		if(this.icon && this.settings.get_string('show-icon') == "left")
 			left_padding=this.icon.get_width()
 
-		const progressbarWidth = Math.floor(this.label.get_width() * position_per)
+		const progressbarWidth = Math.floor(this.label.get_width() * position_ratio)
 		const progressbarHeight = Math.floor(Main.panel.get_height() * 0.1)
 		const top_padding = Main.panel.get_height() - progressbarHeight - 1 //place bar at bottom
 
 		const url = import.meta.url; //full path to extensions.js
 		const extension_path = url.substring(0,url.lastIndexOf('/'));
-		let inlineStyle = "background-image: url('" + extension_path + "/img/grey_rectangle.svg');" + 
+		const inlineStyle = "background-image: url('" + extension_path + "/img/grey_rectangle.svg');" + 
 			"background-position: " + left_padding + "px " + top_padding + "px;" +
 			"background-size: " + progressbarWidth + "px " + progressbarHeight + "px;";
 		this.box.set_style(inlineStyle);

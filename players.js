@@ -176,6 +176,8 @@ class Player {
 		const entryWrapper = Gio.DBusProxy.makeProxyWrapper(entryInterface);
 		this.entryProxy = entryWrapper(Gio.DBus.session,this.address, "/org/mpris/MediaPlayer2",this._onEntryProxyReady.bind(this));
 
+		this.positionProxyWrapper = Gio.DBusProxy.makeProxyWrapper(mprisPositionInterface);
+
 	}
 	_onEntryProxyReady(){
 		this.identity = this.entryProxy.Identity;
@@ -227,17 +229,16 @@ class Player {
 		}
 	}
 	getPosition(){ //report position in track as float between 0 - 1)
-		const positionProxyWrapper = Gio.DBusProxy.makeProxyWrapper(mprisPositionInterface);
-		const positionProxy = positionProxyWrapper(Gio.DBus.session, this.address, "/org/mpris/MediaPlayer2");
+		const positionProxy = this.positionProxyWrapper(Gio.DBus.session, this.address, "/org/mpris/MediaPlayer2");
 		const position = positionProxy.Position;
 
 		const length = this.stringFromMetadata("mpris:length",this.metadata); //get song length to calculate % progress
 		
-		let position_per = 0
+		let position_ratio = 0
 		if (length >0)
-			position_per = position / length; //position percentage (format 0.81xxx)
+			position_ratio = position / length; //position percentage (format 0.81xxx)
 
-		return position_per
+		return position_ratio
 	}
 	stringFromMetadata(field) {
 		// metadata is a javascript object
