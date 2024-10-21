@@ -226,8 +226,7 @@ class Player {
 			this.statusTimestamp = new Date().getTime();
 		}
 	}
-	getPosition(){
-		//set up dedicate proxy to extract Position
+	getPosition(){ //report position in track as float between 0 - 1)
 		const positionProxyWrapper = Gio.DBusProxy.makeProxyWrapper(mprisPositionInterface);
 		const positionProxy = positionProxyWrapper(Gio.DBus.session, this.address, "/org/mpris/MediaPlayer2");
 		const position = positionProxy.Position;

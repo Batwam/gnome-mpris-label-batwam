@@ -58,6 +58,10 @@
       <default>true</default>
     </key>
 
+    <key name="show-progress-bar" type="b">
+      <default>true</default>
+    </key>
+
     <key name="remove-text-paused-delay" type="i">
       <default>3</default>
     </key>

@@ -55,9 +55,12 @@ function fillPreferencesWindow(window){
 	let fieldOptions3 = {'artist':'xesam:artist','album':'xesam:album','title':'xesam:title','none':''};
 	let [firstFieldDropDown, secondFieldDropDown, lastFieldDropDown] = addTripleDropDown(settings,group,'first-field','second-field','last-field','Visible fields and order',fieldOptions1,fieldOptions2,fieldOptions3,undefined);
 
+	addSwitch(settings,group,'show-progress-bar','Show Progress Bar',undefined);
+	
 	addResetButton(settings,group,'Reset Label settings',[
 		'max-string-length','refresh-rate','font-color','button-placeholder','label-filtered-list','divider-string','first-field','second-field',
 		'last-field','remove-text-when-paused','remove-text-paused-delay','auto-switch-to-most-recent'],[firstFieldDropDown, secondFieldDropDown, lastFieldDropDown]
+		,'show-progress-bar'
 	);
 
 //filters page:
