@@ -477,9 +477,7 @@ class MprisLabel extends PanelMenu.Button {
 	}
 
 	_setProgressBar(){
-		//TODO: 
-		// include setting to enable/disable progress bar
-		// make this.player.getPosition() async
+		//TODO: make this.player.getPosition() async
 		const SHOW_PROGRESS_BAR = this.settings.get_boolean('show-progress-bar');
 
 		this.box.set_style("background-image: none");
@@ -494,11 +492,9 @@ class MprisLabel extends PanelMenu.Button {
 		if(this.icon && this.settings.get_string('show-icon') == "left")
 			left_padding=this.icon.get_width()
 
-		const containerWidth = this.label.get_width();
-		const containerHeight = Main.panel.get_height();
-		const progressbarWidth = Math.floor(containerWidth * position_per)
-		const progressbarHeight = Math.floor(containerHeight * 0.1)
-		const top_padding = containerHeight - progressbarHeight - 1 //place bar at bottom
+		const progressbarWidth = Math.floor(this.label.get_width() * position_per)
+		const progressbarHeight = Math.floor(Main.panel.get_height() * 0.1)
+		const top_padding = Main.panel.get_height() - progressbarHeight - 1 //place bar at bottom
 
 		const url = import.meta.url; //full path to extensions.js
 		const extension_path = url.substring(0,url.lastIndexOf('/'));
