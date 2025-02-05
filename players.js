@@ -313,11 +313,10 @@ class Player {
 				this.previousWorkspace = currentWorkspace;
 				this.previousWindow = focusedWindow;
 				this.playerWindowMinimized = playerWindow.minimized;
-				
+				playerWindow.activate(global.get_current_time());
+
 				if (this.canRaise) //activate using mpris Raise() function if available
 					this.raise()
-				else
-					playerWindow.activate(global.get_current_time());
 			}
 		}
 	}
