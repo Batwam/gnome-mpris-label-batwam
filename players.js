@@ -23,6 +23,8 @@ const entryInterface = `
 	<interface name="org.mpris.MediaPlayer2">
 		<property name="DesktopEntry" type="s" access="read"/>
 		<property name="Identity" type="s" access="read"/>
+		<property name="CanRaise" type="b" access="read" />
+		<method name="Raise" />
 	</interface>
 </node>`
 
@@ -173,6 +175,7 @@ class Player {
 	_onEntryProxyReady(){
 		this.identity = this.entryProxy.Identity;
 		this.desktopEntry = this.entryProxy.DesktopEntry;
+		this.canRaise = this.entryProxy.CanRaise;
 
 		this.desktopApp = null;
 		let matchedEntries = [];
@@ -208,6 +211,9 @@ class Player {
 			return match
 
 		return matchedEntries[0]
+	}
+	raise() { //activate source app / browser tab
+		this.entryProxy.RaiseAsync()
 	}
 	update(){
 		this.metadata = this.proxy.Metadata;
@@ -307,7 +313,11 @@ class Player {
 				this.previousWorkspace = currentWorkspace;
 				this.previousWindow = focusedWindow;
 				this.playerWindowMinimized = playerWindow.minimized;
-				playerWindow.activate(global.get_current_time());
+				
+				if (this.canRaise) //activate using mpris Raise() function if available
+					this.raise()
+				else
+					playerWindow.activate(global.get_current_time());
 			}
 		}
 	}
