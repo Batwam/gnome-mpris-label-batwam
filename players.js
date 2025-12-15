@@ -1,4 +1,6 @@
-const {Gio,Shell,St} = imports.gi;
+import Gio from 'gi://Gio';
+import Shell from 'gi://Shell';
+import St from 'gi://St';
 
 const mprisInterface = `
 <node>
@@ -47,7 +49,7 @@ const dBusInterface = `
 	</interface>
 </node>`
 
-var Players = class Players {
+export var Players = class Players {
 	constructor(settings){
 		this.list = [];
 		this.activePlayers= [];
