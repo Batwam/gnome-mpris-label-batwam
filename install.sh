@@ -12,13 +12,9 @@ cp -R ./* $DEFAULT_INSTALL_DIR
 printf "\e[32mDone!\e[0m\n"
 
 GNOME_VERSION=$(gnome-shell --version | awk -F'[ .]' '{print $3}') #get major Gnome version
-if [ $GNOME_VERSION -ge 45 ]; then #apply patch if Gnome 45+
-	printf "\e[33mYou are running GNOME 45 or above. The script will try to patch compatibility for this version. See README.md for details.\e[0m\n"
-	patch -d $DEFAULT_INSTALL_DIR < patches/gnome45-compatibility.patch && printf "\e[32mGnome 45+ Patch applied!\e[0m\n" || { printf "\e[31mPatch failed!\e[0m\n"; exit 1 ; }
-	if [ $GNOME_VERSION -ge 47 ]; then #apply patch if Gnome 47+
-		printf "\e[33mYou are running GNOME 47 or above.\e[0m\n"
-		patch --no-backup-if-mismatch -d $DEFAULT_INSTALL_DIR < patches/gnome47-compatibility.patch && printf "\e[32mGnome 47+ Patch applied!\e[0m\n" || { printf "\e[31mPatch failed!\e[0m\n"; exit 1 ; }
-	fi
+if [ $GNOME_VERSION -ge 49 ]; then #apply patch if Gnome 49+
+       printf "\e[33mYou are running GNOME 49 or above. The script will try to patch compatibility for this version. See README.md for details.\e[0m\n"
+       patch -d $DEFAULT_INSTALL_DIR < patches/gnome49-compatibility.patch && printf "\e[32mGnome 49+ Patch applied!\e[0m\n" || { printf "\e[31mPatch failed!\e[0m\n"; exit 1 ; }
 fi
 
 if [ $XDG_SESSION_TYPE = "x11" ]; then
