@@ -125,7 +125,7 @@ class MprisLabel extends PanelMenu.Button {
 		if(this._timeout) //prevent refreshes while changing position
 			this._removeTimeout();
 
-		if (this.container.get_parent())
+		if (this.container && this.container.get_parent())
 			this.container.get_parent().remove_child(this.container);
 
 		if (EXTENSION_PLACE == "left"){
