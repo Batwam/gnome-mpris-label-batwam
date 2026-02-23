@@ -295,45 +295,71 @@ class MprisLabel extends PanelMenu.Button {
 		let stream = [];
 		stream[0] = this.volumeControl.get_default_sink();
 		let streamName = 'System Volume (Global)';
+		let volumeRatio = 1; //used to determine OSD icon and level, from 0 to 1
 
 		const CONTROL_SCHEME = this.settings.get_string('volume-control-scheme');
+		const monitor = global.display.get_current_monitor(); //identify current monitor for OSD
+		const steps = 30; //number of steps for the scroll to go from min to max volume (for smoothness)
 
-		if(CONTROL_SCHEME == 'application' && this.player){
-			if(!this.stream || this.stream.length == 0)
-				this._getStream();
-
-			if (this.stream && this.stream.length > 0){ //will fall back to System Volume (Global)
-				stream = this.stream;
-				streamName = this.player.identity;
+		if(CONTROL_SCHEME == 'mpris' && this.player){
+			if (this.player.mpris_volume == null) {
+				let warning = this.player.identity + ' does not support MPRIS volume control';
+				log(Date().substring(16,24)+' gnome-mpris-label-batwam/extension.js - ' + warning);
+				// const warningIcon = Gio.Icon.new_for_string('dialog-warning-symbolic');
+				// Main.osdWindowManager.show(monitor, warningIcon, "test", 0);
+				return
 			}
+
+			streamName = this.player.identity + " (mpris)";
+			if(delta == 0){//toggle mute
+				this.player.toggle_mpris_is_muted();
+			}
+			else {
+				let newVolume = this.player.mpris_volume + delta / steps;
+				newVolume = Math.clamp(0,newVolume,1); 
+				this.player.set_mpris_volume(newVolume);
+				log(Date().substring(16,24)+' gnome-mpris-label-batwam/extension.js - current mpris_volume: '+this.player.mpris_volume);
+			}
+			volumeRatio = this.player.mpris_volume;
 		}
+		else {
+			if(CONTROL_SCHEME == 'application' && this.player){
+				if(!this.stream || this.stream.length == 0)
+					this._getStream();
 
-		let max = this.volumeControl.get_vol_max_norm()
-		let step = max / 30;
-		let volume = stream[0].volume;
-		stream.forEach(stream => {//if multiple stream, use the lowest as base reference
-			if (stream.volume < volume)
-				volume = stream.volume;
-		});
-
-		let newVolume = volume + step * delta;
-		newVolume = Math.round(Math.clamp(0,newVolume,max));
-
-		stream.forEach(stream => {
-			stream.volume = newVolume;
-			stream.push_volume();
-		});
-
-		let volumeRatio = newVolume/max;
-		let monitor = global.display.get_current_monitor(); //identify current monitor for OSD
-
-		if(delta == 0){//toggle mute
-			stream.forEach(stream => {
-				stream.change_is_muted(!stream.is_muted);
-				if(!stream.is_muted) //set mute icon
-					volumeRatio = 0
+				if (this.stream && this.stream.length > 0){ //will fall back to System Volume (Global)
+					stream = this.stream;
+					streamName = this.player.identity;
+				}
+			}
+			
+			let maxVolume = this.volumeControl.get_vol_max_norm()
+			let volume = stream[0].volume;
+			stream.forEach(stream => {//if multiple stream, use the lowest as base reference
+				if (stream.volume < volume)
+					volume = stream.volume;
 			});
+
+			let newVolume = volume +  maxVolume * delta / steps;
+			newVolume = Math.round(Math.clamp(0,newVolume,maxVolume));
+
+			if(delta == 0){//toggle mute
+				this.player.is_muted = !stream[0].is_muted; //save mute status
+				stream.forEach(stream => {
+					stream.change_is_muted(!stream.is_muted);
+				});
+			}
+			else {
+				stream.forEach(stream => {
+					stream.volume = newVolume;
+					stream.push_volume();
+				});
+			}
+			volumeRatio = newVolume/maxVolume;
 		}
+
+		if(this.player.is_muted) //set mute icon
+			volumeRatio = 0
 
 		const icon = Gio.Icon.new_for_string(this._setVolumeIcon(volumeRatio));
 		Main.osdWindowManager.show(monitor, icon, streamName, volumeRatio);
@@ -519,7 +545,7 @@ class MprisLabel extends PanelMenu.Button {
 				this.icon.set_style('-st-icon-style: symbolic;');
 		}
 
-		if (this.icon != null | undefined){
+		if (this.icon != null){
 			if (ICON_PLACE == "right"){
 				this._update_style(this.label, "margin-right", ICON_PADDING + "px");
 				this.box.add_child(this.icon);

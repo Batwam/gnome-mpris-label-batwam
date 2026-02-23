@@ -131,7 +131,7 @@ fillPreferencesWindow(window){
 	bindSensitive();
 	
 	group = addGroup(page,'Behaviour');
-	let [volumeControlDropDown] = addDropDown(settings,group,'volume-control-scheme','Volume control scheme',{'application':'application','global':'global'},undefined,140);
+	let [volumeControlDropDown] = addDropDown(settings,group,'volume-control-scheme','Volume control scheme',{'application':'application','global':'global','mpris':'mpris'},"Note: mpris volume not implemented by all apps",140);
 
 	addResetButton(settings,group,'Reset Controls settings',[
 		'enable-double-clicks','double-click-time','left-click-action','left-double-click-action','middle-click-action','middle-double-click-action',

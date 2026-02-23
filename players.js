@@ -1,6 +1,7 @@
 import Gio from 'gi://Gio';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
+import GLib from 'gi://GLib';
 
 const mprisInterface = `
 <node>
@@ -16,6 +17,7 @@ const mprisInterface = `
 		<property name="CanGoPrevious" type="b" access="read" />
 		<property name="Metadata" type="a{sv}" access="read"/>
 		<property name="PlaybackStatus" type="s" access="read"/>
+		<property name="Volume" type="d" access="readwrite"/>
 	</interface>
 
 </node>`
@@ -43,6 +45,18 @@ const dBusInterface = `
 		</signal>
 	</interface>
 </node>`
+
+const propsInterface = `
+<node>
+    <interface name="org.freedesktop.DBus.Properties">
+        <method name="Set">
+            <arg direction="in" type="s"/>
+            <arg direction="in" type="s"/>
+            <arg direction="in" type="v"/>
+        </method>
+    </interface>
+</node>`
+
 
 export var Players = class Players {
 	constructor(settings){
@@ -173,6 +187,8 @@ class Player {
 		const entryWrapper = Gio.DBusProxy.makeProxyWrapper(entryInterface);
 		this.entryProxy = entryWrapper(Gio.DBus.session,this.address, "/org/mpris/MediaPlayer2",this._onEntryProxyReady.bind(this));
 
+		const propsProxyWrapper = Gio.DBusProxy.makeProxyWrapper(propsInterface);
+		this.propsProxy = propsProxyWrapper(Gio.DBus.session, this.address, "/org/mpris/MediaPlayer2",null);
 	}
 	_onEntryProxyReady(){
 		this.identity = this.entryProxy.Identity;
@@ -216,6 +232,7 @@ class Player {
 	}
 	update(){
 		this.metadata = this.proxy.Metadata;
+		this.mpris_volume = this.proxy.Volume;;
 
 		let playbackStatus = this.proxy.PlaybackStatus;
 
@@ -290,6 +307,23 @@ class Player {
 			return
 		}
 	}
+
+	set_mpris_volume(volume){
+		this.propsProxy.SetAsync("org.mpris.MediaPlayer2.Player", "Volume", new GLib.Variant('d', volume));
+		this.mpris_volume = volume;
+	}
+
+	toggle_mpris_is_muted(){
+		if (! this.mpris_muted_volume){ //if not muted, store current volume and mute
+			this.mpris_muted_volume = this.mpris_volume;
+			this.set_mpris_volume(0);
+		}
+		else { //if muted, restore volume and unmute
+			this.set_mpris_volume(this.mpris_muted_volume);
+			this.mpris_muted_volume = null;
+		}
+	}
+
 	raise() { //activate source app / browser tab
 		this.entryProxy.RaiseAsync();
 	}
