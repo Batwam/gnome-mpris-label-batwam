@@ -354,7 +354,7 @@ class MprisLabel extends PanelMenu.Button {
 			volumeRatio = newVolume/maxVolume;
 		}
 
-		if(this.player.is_muted) //set mute icon
+		if(this.player.is_muted) //set to 0 to use mute icon
 			volumeRatio = 0
 
 		const monitor = global.display.get_current_monitor(); //identify current monitor for OSD
@@ -545,7 +545,7 @@ class MprisLabel extends PanelMenu.Button {
 				this.icon.set_style('-st-icon-style: symbolic;');
 		}
 
-		if (this.icon != null){
+		if (this.icon != null | undefined){
 			if (ICON_PLACE == "right"){
 				this._update_style(this.label, "margin-right", ICON_PADDING + "px");
 				this.box.add_child(this.icon);
