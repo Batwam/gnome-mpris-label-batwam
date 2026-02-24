@@ -232,7 +232,7 @@ class Player {
 	}
 	update(){
 		this.metadata = this.proxy.Metadata;
-		this.mpris_volume = this.proxy.Volume;;
+		this.mpris_volume = this.proxy.Volume;
 
 		let playbackStatus = this.proxy.PlaybackStatus;
 
@@ -309,18 +309,36 @@ class Player {
 	}
 
 	set_mpris_volume(volume){
-		this.propsProxy.SetAsync("org.mpris.MediaPlayer2.Player", "Volume", new GLib.Variant('d', volume));
+		const original_volume = this.proxy.Volume;
+		if (volume == original_volume)
+			return
+
+		this.propsProxy.SetRemote("org.mpris.MediaPlayer2.Player", "Volume", new GLib.Variant('d', volume))
 		this.mpris_volume = volume;
+
+		//check once if there is an actual volume change, some players (chrome) don't apply changes
+		if (!this.canSetMprisVolume)
+			this.check_mpris_volume_control(original_volume);
+	}
+
+	async check_mpris_volume_control(original_volume){
+		await new Promise(resolve => setTimeout(resolve, 300));
+		if ( this.proxy.Volume == original_volume)
+			this.canSetMprisVolume = false;
+		else
+			this.canSetMprisVolume = true;
 	}
 
 	toggle_mpris_is_muted(){
 		if (! this.mpris_muted_volume){ //if not muted, store current volume and mute
-			this.mpris_muted_volume = this.mpris_volume;
+			this.mpris_muted_volume = this.proxy.Volume;
 			this.set_mpris_volume(0);
+			this.is_muted = true;
 		}
 		else { //if muted, restore volume and unmute
 			this.set_mpris_volume(this.mpris_muted_volume);
 			this.mpris_muted_volume = null;
+			this.is_muted = false;
 		}
 	}
 

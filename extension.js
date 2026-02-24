@@ -302,25 +302,22 @@ class MprisLabel extends PanelMenu.Button {
 		const steps = 30; //number of steps for the scroll to go from min to max volume (for smoothness)
 
 		if(CONTROL_SCHEME == 'mpris' && this.player){
-			if (this.player.mpris_volume == null) {
-				let warning = this.player.identity + ' does not support MPRIS volume control';
-				log(Date().substring(16,24)+' gnome-mpris-label-batwam/extension.js - ' + warning);
-				// const warningIcon = Gio.Icon.new_for_string('dialog-warning-symbolic');
-				// Main.osdWindowManager.show(monitor, warningIcon, "test", 0);
-				return
-			}
-
-			streamName = this.player.identity + " (mpris)";
-			if(delta == 0){//toggle mute
-				this.player.toggle_mpris_is_muted();
+			if (this.player.mpris_volume == null || this.player.canSetMprisVolume == false) {
+				streamName = this.player.identity + ' does not support MPRIS volume control';
+				volumeRatio = null; //set to null to use "warning" icon in OSD
 			}
 			else {
-				let newVolume = this.player.mpris_volume + delta / steps;
-				newVolume = Math.clamp(0,newVolume,1); 
-				this.player.set_mpris_volume(newVolume);
-				log(Date().substring(16,24)+' gnome-mpris-label-batwam/extension.js - current mpris_volume: '+this.player.mpris_volume);
+				streamName = this.player.identity + " (mpris)";
+				if(delta == 0){//toggle mute
+					this.player.toggle_mpris_is_muted();
+				}
+				else {
+					let newVolume = this.player.mpris_volume + delta / steps;
+					newVolume = Math.clamp(0,newVolume,1);
+					this.player.set_mpris_volume(newVolume);
+				}
+				volumeRatio = this.player.mpris_volume;
 			}
-			volumeRatio = this.player.mpris_volume;
 		}
 		else {
 			if(CONTROL_SCHEME == 'application' && this.player){
@@ -393,6 +390,9 @@ class MprisLabel extends PanelMenu.Button {
 	}
 
 	_setVolumeIcon(volume) {
+		if (volume == null) //if volume is null (i.e. no volume control available), return a specific icon
+			return 'dialog-warning-symbolic';
+
 		let volume_icon = 'audio-volume-high-symbolic';
 		switch (true) {
 			case (volume == 0):
