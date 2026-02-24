@@ -295,10 +295,9 @@ class MprisLabel extends PanelMenu.Button {
 		let stream = [];
 		stream[0] = this.volumeControl.get_default_sink();
 		let streamName = 'System Volume (Global)';
-		let volumeRatio = 1; //used to determine OSD icon and level, from 0 to 1
+		let volumeRatio; //used to determine OSD icon and level, from 0 to 1
 
 		const CONTROL_SCHEME = this.settings.get_string('volume-control-scheme');
-		const monitor = global.display.get_current_monitor(); //identify current monitor for OSD
 		const steps = 30; //number of steps for the scroll to go from min to max volume (for smoothness)
 
 		if(CONTROL_SCHEME == 'mpris' && this.player){
@@ -358,6 +357,7 @@ class MprisLabel extends PanelMenu.Button {
 		if(this.player.is_muted) //set mute icon
 			volumeRatio = 0
 
+		const monitor = global.display.get_current_monitor(); //identify current monitor for OSD
 		const icon = Gio.Icon.new_for_string(this._setVolumeIcon(volumeRatio));
 		Main.osdWindowManager.show(monitor, icon, streamName, volumeRatio);
 	}
